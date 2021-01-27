@@ -25,3 +25,5 @@ edison-*.tar
 
 # Temporary files for e.g. tests
 /tmp
+
+**/*.secret.exs
