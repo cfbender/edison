@@ -8,7 +8,7 @@ defmodule Edison.Mechmarket do
 
   require Logger
 
-  @refresh_interval :timer.seconds(60)
+  @refresh_interval :timer.seconds(30)
 
   @mechmarket_query System.get_env("EDISON_MECHMARKET_QUERY", "US-UT")
 
@@ -24,32 +24,27 @@ defmodule Edison.Mechmarket do
 
   @impl true
   def init(:ok) do
-    {url, time} = fetch_posts()
-
-    Api.create_message!(
-      @mechmarket_channel,
-      "New post matching #{@mechmarket_query}: #{url}"
-    )
-
+    post_data = fetch_posts()
+    Logger.debug("Starting mechmarket poller..")
     schedule_refresh()
-    {:ok, {url, time}}
+    {:ok, post_data}
   end
 
   @impl true
-  def handle_info(:refresh, {_last_post, last_time}) do
-    {url, time} = fetch_posts()
+  def handle_info(:refresh, %{latest_time: last_time}) do
+    post_data = %{url: url, latest_time: time, author: author} = fetch_posts()
 
     if DateTime.compare(time, last_time) == :gt do
       Logger.debug("New mechmarket post found")
 
       Api.create_message!(
         @mechmarket_channel,
-        "New post matching #{@mechmarket_query}: #{url}"
+        "New post by /u/#{author} for #{@mechmarket_query}: #{url}"
       )
     end
 
     schedule_refresh()
-    {:noreply, {url, time}}
+    {:noreply, post_data}
   end
 
   defp schedule_refresh do
@@ -63,11 +58,12 @@ defmodule Edison.Mechmarket do
       %{"data" => %{"children" => children}} =
         HTTPoison.get!(@url) |> Map.get(:body) |> Poison.decode!()
 
-      %{"data" => %{"created_utc" => created_utc, "url" => url}} = children |> List.first()
+      %{"data" => %{"created_utc" => created_utc, "url" => url, "author" => author}} =
+        children |> List.first()
 
       {:ok, latest_time} = created_utc |> trunc() |> DateTime.from_unix()
 
-      {url, latest_time}
+      %{url: url, latest_time: latest_time, author: author}
     rescue
       e in RuntimeError -> Logger.debug(e)
     end
