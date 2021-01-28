@@ -11,8 +11,6 @@ defmodule Edison.Consumer do
   @impl true
   @spec handle_event(Nostrum.Consumer.event()) :: any()
   def handle_event({:MESSAGE_CREATE, msg, _ws_state}) do
-    IO.inspect(msg.content)
-
     case msg.content do
       "!ping" ->
         Api.create_message(msg.channel_id, "pong")

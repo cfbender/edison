@@ -7,7 +7,7 @@ defmodule Edison.Supervisor do
 
   @impl true
   def init(_init_arg) do
-    children = [Edison.Consumer]
+    children = [Edison.Consumer, Edison.Mechmarket]
 
     Supervisor.init(children, strategy: :one_for_one)
   end
