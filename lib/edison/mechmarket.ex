@@ -8,7 +8,7 @@ defmodule Edison.Mechmarket do
 
   require Logger
 
-  @refresh_interval :timer.seconds(15)
+  @refresh_interval :timer.seconds(60)
 
   @mechmarket_query System.get_env("EDISON_MECHMARKET_QUERY", "US-UT")
 
@@ -59,13 +59,17 @@ defmodule Edison.Mechmarket do
   defp fetch_posts() do
     Logger.debug("Fetching latest mechmarket posts...")
 
-    %{"data" => %{"children" => children}} =
-      HTTPoison.get!(@url) |> Map.get(:body) |> Poison.decode!()
+    try do
+      %{"data" => %{"children" => children}} =
+        HTTPoison.get!(@url) |> Map.get(:body) |> Poison.decode!()
 
-    %{"data" => %{"created_utc" => created_utc, "url" => url}} = children |> List.first()
+      %{"data" => %{"created_utc" => created_utc, "url" => url}} = children |> List.first()
 
-    {:ok, latest_time} = created_utc |> trunc() |> DateTime.from_unix()
+      {:ok, latest_time} = created_utc |> trunc() |> DateTime.from_unix()
 
-    {url, latest_time}
+      {url, latest_time}
+    rescue
+      e in RuntimeError -> Logger.debug(e)
+    end
   end
 end
