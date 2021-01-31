@@ -5,7 +5,7 @@ A discord bot for the UTMK server
 
 ## Development
 
-To run locally, set the `token` property in `dev.secret.exs` using the example file as a template, and set `EDISON_MECHMARKET_CHANNEL` as an environment variable.
+To run locally, set the `token` property in `dev.secret.exs` using the example file as a template, as well as the mechmarket channel and role IDs for the `:edison` config.
 
 In order to override the default query, you can set `EDISON_MECHMARKET_QUERY` to whatever search term you'd like for searching /r/mechmarket.
 

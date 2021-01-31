@@ -10,12 +10,11 @@ defmodule Edison.Mechmarket do
 
   @refresh_interval :timer.seconds(30)
 
-  @mechmarket_query System.get_env("EDISON_MECHMARKET_QUERY", "US-UT")
+  @mechmarket_query Application.fetch_env!(:edison, :mechmarket_query)
 
   @url "https://www.reddit.com/r/mechmarket/search.json?q=#{@mechmarket_query}&restrict_sr=true&limit=5&sort=new"
 
-  @mechmarket_channel System.get_env("EDISON_MECHMARKET_CHANNEL", "0")
-                      |> String.to_integer()
+  @mechmarket_channel Application.fetch_env!(:edison, :mechmarket_channel)
 
   @spec start_link(GenServer.options()) :: GenServer.on_start()
   def start_link(options) do
