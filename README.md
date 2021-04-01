@@ -2,6 +2,7 @@
 A discord bot for the UTMK server
 ### Features
 - Mechmarket poller
+- Vaccine appointment poller
 
 ## Development
 
