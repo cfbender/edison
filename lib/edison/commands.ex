@@ -1,5 +1,6 @@
 defmodule Edison.Commands do
   alias Nostrum.Api
+  alias Edison.Roles
 
   @prefix "!edison"
 
@@ -13,20 +14,17 @@ defmodule Edison.Commands do
           "ping" ->
             Api.create_message(msg.channel_id, "pong")
 
-          "give_role mechmarket" ->
-            mechmarket_role_id = Application.fetch_env!(:edison, :mechmarket_role_id)
+          "give_role " <> role ->
+            case role do
+              "mechmarket" ->
+                Roles.add_role("mechmarket_role_id", msg)
 
-            mechmarket_role_name =
-              Api.get_guild_roles!(msg.guild_id)
-              |> Enum.find(fn role -> role.id == mechmarket_role_id end)
-              |> Map.get(:name)
+              "vaccine" ->
+                Roles.add_role("vaccine_role_id", msg)
 
-            Api.add_guild_member_role(msg.guild_id, msg.author.id, mechmarket_role_id)
-
-            Api.create_message(
-              msg.channel_id,
-              "Added role @#{mechmarket_role_name} to <@#{msg.author.id}>"
-            )
+              _ ->
+                :ignore
+            end
 
           _ ->
             :ignore

@@ -27,10 +27,14 @@ defmodule Edison.Vaccine do
     riverton:
       "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5064959/availabilities?region=IHMACX&days=10&private=true",
     utah_valley:
-      "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5065025/availabilities?region=IHMACX&days=10&private=true"
+      "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5065025/availabilities?region=IHMACX&days=10&private=true",
+    st_george:
+      "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5064976/availabilities?region=IHMACX&days=10&private=true"
   ]
 
   @covid_channel Application.fetch_env!(:edison, :covid_channel)
+
+  @vaccine_role_id Application.fetch_env!(:edison, :vaccine_role_id)
 
   @spec start_link(GenServer.options()) :: GenServer.on_start()
   def start_link(options) do
@@ -60,7 +64,7 @@ defmodule Edison.Vaccine do
           Api.create_message!(
             @covid_channel,
             """
-            New vaccine appointment found at #{name}
+            <@&#{@vaccine_role_id}> New vaccine appointment found at #{name}
             #{@appointment_link}
             """
           )
@@ -111,8 +115,7 @@ defmodule Edison.Vaccine do
                     appts_avail && !location(prev_record, :appt)
 
                   true ->
-                    # change later to not post first appt on startup
-                    true
+                    false
                 end
 
               location(
