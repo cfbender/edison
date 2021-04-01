@@ -8,7 +8,7 @@ defmodule Edison.Mechmarket do
 
   require Logger
 
-  @refresh_interval :timer.seconds(30)
+  @refresh_interval :timer.seconds(120)
 
   @mechmarket_query Application.fetch_env!(:edison, :mechmarket_query)
 
