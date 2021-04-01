@@ -1,4 +1,6 @@
 defmodule Edison.Roles do
+  alias Nostrum.Api
+
   @spec add_role(String.t(), Nostrum.Struct.Message.t()) :: any()
   def add_role(config_name, msg) do
     role_id = Application.fetch_env!(:edison, String.to_atom(config_name))
