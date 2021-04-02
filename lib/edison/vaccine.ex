@@ -10,8 +10,8 @@ defmodule Edison.Vaccine do
   require Record
 
   @type location ::
-          record(:location, id: integer(), name: String.t(), appt: boolean(), new_appt: boolean())
-  Record.defrecordp(:location, id: 0, name: "Hospital Name", appt: false, new_appt: false)
+          record(:location, id: integer(), name: String.t(), address: String.t(), appt: boolean(), new_appt: boolean())
+  Record.defrecordp(:location, id: 0, name: "Hospital Name", address: "No Address Found", appt: false, new_appt: false)
 
   @refresh_interval :timer.seconds(60)
 
@@ -27,9 +27,7 @@ defmodule Edison.Vaccine do
     riverton:
       "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5064959/availabilities?region=IHMACX&days=10&private=true",
     utah_valley:
-      "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5065025/availabilities?region=IHMACX&days=10&private=true",
-    st_george:
-      "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5064976/availabilities?region=IHMACX&days=10&private=true"
+      "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5065025/availabilities?region=IHMACX&days=10&private=true"
   ]
 
   @covid_channel Application.fetch_env!(:edison, :covid_channel)
@@ -56,7 +54,7 @@ defmodule Edison.Vaccine do
     new_data
     |> Enum.each(fn record ->
       spawn(fn ->
-        location(new_appt: new_appt, appt: appt, name: name) = record
+        location(new_appt: new_appt, appt: appt, name: name, address: address) = record
 
         if new_appt && appt do
           Logger.debug("New vaccine appointment found")
@@ -65,6 +63,7 @@ defmodule Edison.Vaccine do
             @covid_channel,
             """
             <@&#{@vaccine_role_id}> New vaccine appointment found at #{name}
+            (#{address})
             #{@appointment_link}
             """
           )
@@ -121,6 +120,7 @@ defmodule Edison.Vaccine do
               location(
                 id: cal["calendarId"],
                 name: cal["name"],
+                address: cal["location"],
                 appt: appts_avail,
                 new_appt: new_appt
               )
