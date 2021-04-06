@@ -26,7 +26,7 @@ defmodule Edison.Commands do
                 :ignore
             end
 
-          "remove_role" <> role ->
+          "remove_role " <> role ->
             case role do
               "mechmarket" ->
                 Roles.remove_role("mechmarket_role_id", msg)
