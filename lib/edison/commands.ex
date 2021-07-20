@@ -18,9 +18,11 @@ defmodule Edison.Commands do
             case role do
               "mechmarket" ->
                 Roles.add_role("mechmarket_role_id", msg)
+                Api.delete_message(msg.channel_id, msg.id)
 
               "vaccine" ->
                 Roles.add_role("vaccine_role_id", msg)
+                Api.delete_message(msg.channel_id, msg.id)
 
               _ ->
                 :ignore
@@ -30,13 +32,16 @@ defmodule Edison.Commands do
             case role do
               "mechmarket" ->
                 Roles.remove_role("mechmarket_role_id", msg)
+                Api.delete_message(msg.channel_id, msg.id)
 
               "vaccine" ->
                 Roles.remove_role("vaccine_role_id", msg)
+                Api.delete_message(msg.channel_id, msg.id)
 
               _ ->
                 :ignore
             end
+
           _ ->
             :ignore
         end

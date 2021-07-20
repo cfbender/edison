@@ -11,11 +11,6 @@ defmodule Edison.Roles do
       |> Map.get(:name)
 
     Api.add_guild_member_role(msg.guild_id, msg.author.id, role_id)
-
-    Api.create_message(
-      msg.channel_id,
-      "Added role @#{role_name} to <@#{msg.author.id}>"
-    )
   end
 
   @spec remove_role(String.t(), Nostrum.Struct.Message.t()) :: any()
@@ -28,10 +23,5 @@ defmodule Edison.Roles do
       |> Map.get(:name)
 
     Api.remove_guild_member_role(msg.guild_id, msg.author.id, role_id)
-
-    Api.create_message(
-      msg.channel_id,
-      "Removed role @#{role_name} for <@#{msg.author.id}>"
-    )
   end
 end
