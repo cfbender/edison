@@ -30,8 +30,8 @@ defmodule Edison.Mechmarket do
   end
 
   @impl true
-  def handle_info(:refresh, %{latest_time: last_time}) do
-    post_data = %{url: url, latest_time: time, author: author} = fetch_posts()
+  def handle_info(:refresh, %{latest_time: last_time} = data) do
+    post_data = %{url: url, latest_time: time, author: author} = fetch_posts(data)
 
     if DateTime.compare(time, last_time) == :gt do
       Logger.debug("New mechmarket post found")
@@ -50,7 +50,9 @@ defmodule Edison.Mechmarket do
     Process.send_after(self(), :refresh, @refresh_interval)
   end
 
-  defp fetch_posts() do
+  defp fetch_posts(), do: fetch_posts(%{latest_time: DateTime.from_unix!(0)})
+
+  defp fetch_posts(%{latest_time: last_time} = data) do
     Logger.debug("Fetching latest mechmarket posts...")
 
     try do
@@ -62,7 +64,16 @@ defmodule Edison.Mechmarket do
 
       {:ok, latest_time} = created_utc |> trunc() |> DateTime.from_unix()
 
-      %{url: url, latest_time: latest_time, author: author}
+      # if latest post is older than last, skip it
+      if DateTime.compare(last_time, latest_time) == :gt do
+        Logger.debug(
+          "Skipping post since latest post has time #{latest_time} which is before #{last_time}"
+        )
+
+        data
+      else
+        %{url: url, latest_time: latest_time, author: author}
+      end
     rescue
       e in RuntimeError -> Logger.debug(e)
     end

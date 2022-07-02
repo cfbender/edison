@@ -1,6 +1,8 @@
 defmodule Edison.Vaccine do
   @moduledoc """
   A polling GenServer that checks endpoints for vaccine appt availability
+
+  DEPRECATED: to reinstate, add secrets back to config and add this module back to the supervisor
   """
   use GenServer
 
@@ -10,8 +12,20 @@ defmodule Edison.Vaccine do
   require Record
 
   @type location ::
-          record(:location, id: integer(), name: String.t(), address: String.t(), appt: boolean(), new_appt: boolean())
-  Record.defrecordp(:location, id: 0, name: "Hospital Name", address: "No Address Found", appt: false, new_appt: false)
+          record(:location,
+            id: integer(),
+            name: String.t(),
+            address: String.t(),
+            appt: boolean(),
+            new_appt: boolean()
+          )
+  Record.defrecordp(:location,
+    id: 0,
+    name: "Hospital Name",
+    address: "No Address Found",
+    appt: false,
+    new_appt: false
+  )
 
   @refresh_interval :timer.seconds(60)
 
@@ -30,9 +44,9 @@ defmodule Edison.Vaccine do
       "https://fvwzwdt8ld.execute-api.us-west-2.amazonaws.com/prod/covid19testing/sites/5065025/availabilities?region=IHMACX&days=10&private=true"
   ]
 
-  @covid_channel Application.fetch_env!(:edison, :covid_channel)
+  @covid_channel Application.get_env(:edison, :covid_channel)
 
-  @vaccine_role_id Application.fetch_env!(:edison, :vaccine_role_id)
+  @vaccine_role_id Application.get_env(:edison, :vaccine_role_id)
 
   @spec start_link(GenServer.options()) :: GenServer.on_start()
   def start_link(options) do
@@ -84,7 +98,7 @@ defmodule Edison.Vaccine do
 
     try do
       @urls
-      |> Enum.map(fn {name, url} ->
+      |> Enum.map(fn {_name, url} ->
         Task.async(fn ->
           {type, response} = HTTPoison.get(url, [], timeout: 20_000, recv_timeout: 20_000)
 
