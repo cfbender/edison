@@ -23,10 +23,17 @@ defmodule Edison.Mechmarket do
 
   @impl true
   def init(:ok) do
-    post_data = fetch_posts()
-    Logger.debug("Starting mechmarket poller..")
-    schedule_refresh()
-    {:ok, post_data}
+    fetch_posts()
+    |> case do
+      %{url: _, latest_time: _, author: _} = post_data ->
+        Logger.debug("Starting mechmarket poller..")
+        schedule_refresh()
+        {:ok, post_data}
+
+      _ ->
+        Logger.debug("Error starting poller. Scheduling refresh..")
+        {:ok, latest_time: DateTime.now("Etc/UTC")}
+    end
   end
 
   @impl true
