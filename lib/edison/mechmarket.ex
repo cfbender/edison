@@ -32,7 +32,8 @@ defmodule Edison.Mechmarket do
 
       _ ->
         Logger.debug("Error starting poller. Scheduling refresh..")
-        {:ok, latest_time: DateTime.now("Etc/UTC")}
+        schedule_refresh()
+        {:ok, %{latest_time: DateTime.now("Etc/UTC")}}
     end
   end
 
