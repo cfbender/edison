@@ -1,5 +1,5 @@
 defmodule Edison.Healthcheck do
- import Plug.Conn
+  import Plug.Conn
 
   def init(options) do
     # initialize options

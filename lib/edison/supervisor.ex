@@ -7,7 +7,11 @@ defmodule Edison.Supervisor do
 
   @impl true
   def init(_init_arg) do
-    children = [Edison.Consumer, Edison.Mechmarket, {Plug.Cowboy, scheme: :http, plug: Edison.Healthcheck, options: [port: 4000]}]
+    children = [
+      Edison.Consumer,
+      Edison.Mechmarket,
+      {Plug.Cowboy, scheme: :http, plug: Edison.Healthcheck, options: [port: 4000]}
+    ]
 
     Supervisor.init(children, strategy: :one_for_one)
   end

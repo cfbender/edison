@@ -55,15 +55,11 @@ defmodule Edison.Mechmarket do
   defp fetch_posts(%{latest_time: last_time} = data) do
     Logger.debug("Fetching latest mechmarket posts...")
 
-    try do
-      %{"data" => %{"children" => children}} =
-        HTTPoison.get!(@url) |> Map.get(:body) |> Poison.decode!()
-
-      %{"data" => %{"created_utc" => created_utc, "url" => url, "author" => author}} =
-        children |> List.first()
-
-      {:ok, latest_time} = created_utc |> trunc() |> DateTime.from_unix()
-
+    with %{"data" => %{"children" => children}} <-
+           HTTPoison.get!(@url) |> Map.get(:body) |> Poison.decode!(),
+         %{"data" => %{"created_utc" => created_utc, "url" => url, "author" => author}} <-
+           children |> List.first(),
+         {:ok, latest_time} <- created_utc |> trunc() |> DateTime.from_unix() do
       # if latest post is older than last, skip it
       if DateTime.compare(last_time, latest_time) == :gt do
         Logger.debug(
@@ -74,8 +70,6 @@ defmodule Edison.Mechmarket do
       else
         %{url: url, latest_time: latest_time, author: author}
       end
-    rescue
-      e in RuntimeError -> Logger.debug(e)
     end
   end
 end

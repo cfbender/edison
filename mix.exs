@@ -23,7 +23,7 @@ defmodule Edison.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:nostrum, "~> 0.4"},
+      {:nostrum, "~> 0.8"},
       {:httpoison, "~> 1.8"},
       {:poison, "~> 3.1"},
       {:plug, "~> 1.13"},
