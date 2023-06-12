@@ -38,19 +38,25 @@ defmodule Edison.Mechmarket do
 
   @impl true
   def handle_info(:refresh, %{latest_time: last_time} = data) do
-    post_data = %{url: url, latest_time: time, author: author} = fetch_posts(data)
+    fetch_posts(data)
+    |> case do
+      %{url: url, latest_time: time, author: author} = post_data ->
+        if DateTime.compare(time, last_time) == :gt do
+          Logger.debug("New mechmarket post found")
 
-    if DateTime.compare(time, last_time) == :gt do
-      Logger.debug("New mechmarket post found")
+          Api.create_message!(
+            @mechmarket_channel,
+            "New post by /u/#{author} for #{@mechmarket_query}: #{url}"
+          )
+        end
 
-      Api.create_message!(
-        @mechmarket_channel,
-        "New post by /u/#{author} for #{@mechmarket_query}: #{url}"
-      )
+        schedule_refresh()
+        {:noreply, post_data}
+
+      _ ->
+        schedule_refresh()
+        {:noreply, %{latest_time: DateTime.now("Etc/UTC")}}
     end
-
-    schedule_refresh()
-    {:noreply, post_data}
   end
 
   defp schedule_refresh do
@@ -77,6 +83,9 @@ defmodule Edison.Mechmarket do
       else
         %{url: url, latest_time: latest_time, author: author}
       end
+    else
+      _ ->
+        %{latest_time: DateTime.now("Etc/UTC")}
     end
   end
 end
